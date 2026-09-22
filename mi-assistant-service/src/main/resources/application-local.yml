@@ -1,0 +1,18 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/msb}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/msb/protocol/openid-connect/certs}
+
+
+app:
+  keycloak:
+    token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/msb/protocol/openid-connect/token}
+  features:
+    seed-demo-data: true
+
+logging:
+  level:
+    com.app: DEBUG

@@ -1,0 +1,172 @@
+# mi-assistant-service — shared configuration. Profiles: local (docker-compose), greennode (AgentBase).
+server:
+  port: 8080
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: mi-assistant-service
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: true
+  mvc:
+    problemdetails:
+      enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/msb}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/msb/protocol/openid-connect/certs}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/msb?currentSchema=mi,public}
+    username: ${SPRING_DATASOURCE_USERNAME:msb}
+    password: ${SPRING_DATASOURCE_PASSWORD:msb}
+    hikari:
+      maximum-pool-size: 16
+      pool-name: mi-pool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: mi
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: mi
+    liquibase-schema: mi
+  data:
+    redis:
+      url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379/0}
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 16
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  metrics:
+    tags:
+      service: mi-assistant-service
+  tracing:
+    sampling:
+      probability: 1.0
+
+app:
+  locale:
+    default: ${APP_LOCALE_DEFAULT:vi}
+  gateway:
+    internal-url: ${APP_GATEWAY_INTERNAL_URL:http://localhost:8080}
+  keycloak:
+    token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/msb/protocol/openid-connect/token}
+    client-id: ${KEYCLOAK_CLIENT_ID:mi-assistant-service}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET:changeit}
+
+  clients:
+    cms: ${APP_CLIENT_CMS:http://localhost:8094}
+    auth: ${APP_CLIENT_AUTH:http://localhost:8181}
+    account: ${APP_CLIENT_ACCOUNT:http://localhost:8082}
+    transfer: ${APP_CLIENT_TRANSFER:http://localhost:8083}
+    saving: ${APP_CLIENT_SAVING:http://localhost:8084}
+    lending: ${APP_CLIENT_LENDING:http://localhost:8085}
+    card: ${APP_CLIENT_CARD:http://localhost:8086}
+    bill: ${APP_CLIENT_BILL:http://localhost:8088}
+    notification: ${APP_CLIENT_NOTIFICATION:http://localhost:8089}
+    memory: ${APP_CLIENT_MEMORY:http://localhost:8095}
+
+  mi:
+    # The two milestone switches. With chatpay off no mutating tool is registered at all.
+    chatpay:
+      enabled: ${MI_CHATPAY_ENABLED:true}
+    multiagent:
+      enabled: ${MI_MULTIAGENT_ENABLED:true}
+    vrm:
+      # Delegates the wording of a grounded knowledge answer to the VRM agent
+      # (guideline/10-vrm-agent-integration.md §4). mi keeps the turn: screening, routing, retrieval,
+      # tools, guardrails, persistence and streaming. Off by default, and every failure falls back to
+      # mi's own composition, so switching it on can change how an answer reads but never whether one
+      # arrives.
+      enabled: ${MI_VRM_ENABLED:false}
+      base-url: ${MI_VRM_BASE_URL:http://localhost:8099}
+
+    advance:
+      # Advance mode plans several reads and lets the model compose one answer from them
+      # (guideline/09-mi-advance-mode.md). Off by default: it costs seconds and a model call per
+      # turn, and it is only worth it for a question that genuinely spans sources.
+      enabled: ${MI_ADVANCE_ENABLED:false}
+    llm:
+      # `rules` is the deterministic in-process gateway; `openai` (alias `greennode`) switches to
+      # any OpenAI-compatible endpoint: GreenNode AI Platform, LM Studio, Ollama.
+      provider: ${MI_LLM_PROVIDER:rules}
+      base-url: ${LLM_BASE_URL:http://localhost:1234/v1}
+      api-key: ${LLM_API_KEY:}
+      chat-model: ${LLM_CHAT_MODEL:}
+      # A smaller model is enough to pick a domain, and it keeps hand-off cheap.
+      router-model: ${LLM_ROUTER_MODEL:}
+      max-tokens: ${LLM_MAX_TOKENS:6000}
+      # Local weights on a laptop are slow; this is a ceiling, not an expectation.
+      timeout-ms: ${LLM_TIMEOUT_MS:120000}
+    embedding:
+      # `local` is a hashing fallback that needs nothing; `openai` uses a trained model over any
+      # OpenAI-compatible endpoint and is what makes retrieval actually rank by meaning.
+      # `ollama` and `greennode` are accepted aliases of `openai` — the call is the same either way.
+      provider: ${MI_EMBEDDING_PROVIDER:local}
+      # Embeddings share the chat endpoint, credential and model family by default. Set the
+      # MI_EMBEDDING_* variables only when embeddings must live somewhere else than the chat model,
+      # which is the case whenever the chat endpoint serves no embedding model.
+      base-url: ${MI_EMBEDDING_BASE_URL:${LLM_BASE_URL:http://localhost:11434/v1}}
+      api-key: ${MI_EMBEDDING_API_KEY:${LLM_API_KEY:}}
+      model: ${MI_EMBEDDING_MODEL:${LLM_EMBEDDING_MODEL:bge-m3}}
+      # Must match the document_chunk.embedding column. Changing it needs a migration on
+      # document_chunk.embedding plus a full reindex, or retrieval reads garbage.
+      dimension: ${MI_EMBEDDING_DIM:1024}
+    rag:
+      # 0.72 is the figure the design gives for a hosted embedding model. The local hashing
+      # embedder produces lower cosine scores, so the local stack lowers the floor instead of
+      # pretending every answer is unfounded.
+      similarity-threshold: ${MI_RAG_THRESHOLD:0.70}
+    webhook-secret: ${MI_WEBHOOK_SECRET:local-webhook-secret-change-me}
+
+  events:
+    adapter: ${EVENT_BUS_ADAPTER:kafka}
+    publish-interval-ms: 1000
+  features:
+    seed-demo-data: ${APP_SEED_DEMO_DATA:false}
+
+logging:
+  level:
+    root: INFO
+    com.app: INFO
+  # Boot's ECS structured logging: correct JSON escaping and MDC (requestId)
+  # without a hand-rolled pattern.
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        name: mi-assistant-service

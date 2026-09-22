@@ -1,0 +1,484 @@
+/* Brand tokens ported from mobile/src/core/theme/tokens.ts — same values, so the web app reads
+   as the same product as the mobile one rather than a reskin. */
+:root {
+  --accent: #f4600c;
+  --accent-pressed: #c34d0a;
+  --navy: #091e42;
+  --secondary: #505f79;
+  --mi-tint: #feefe7;
+  --bg: #f7f8f9;
+  --card: #ffffff;
+  --border: #dee5ef;
+  --hairline: rgba(9, 30, 66, 0.08);
+  --destructive: #c0392b;
+  --positive: #1e8e5a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--navy);
+}
+
+button {
+  font-family: inherit;
+}
+
+.centered {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(9, 30, 66, 0.08);
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), #ffa95a);
+  margin: 0 auto 16px;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.brand-sub {
+  color: var(--secondary);
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--accent-pressed);
+}
+
+.btn.secondary {
+  background: var(--mi-tint);
+  color: var(--accent);
+}
+
+.btn.secondary:hover {
+  background: #fddfc9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.error-text {
+  color: var(--destructive);
+  font-size: 13px;
+}
+
+/* App shell */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.nav {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 20px;
+}
+
+.nav-brand-text {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.nav-brand-sub {
+  font-size: 11px;
+  color: var(--secondary);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--navy);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background: var(--mi-tint);
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.nav-footer {
+  margin-top: auto;
+  padding: 12px 8px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.nav-user {
+  font-size: 12px;
+  color: var(--secondary);
+  padding: 0 4px 8px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat */
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.chat-header h1 {
+  font-size: 17px;
+  margin: 0;
+}
+
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chat-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--secondary);
+  max-width: 360px;
+}
+
+.bubble-row {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+}
+
+.bubble-row.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble-row.mi {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubble.user {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble.mi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.bubble.typing {
+  color: var(--secondary);
+  font-style: italic;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--navy);
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.citation-row {
+  font-size: 11px;
+  color: var(--secondary);
+  margin-top: 4px;
+}
+
+.card-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  max-width: 420px;
+}
+
+.card-box .card-title {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.card-box .card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.card-box .card-row:last-of-type {
+  border-bottom: none;
+}
+
+.card-box .card-amount {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chat-composer {
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  padding: 16px 24px;
+  display: flex;
+  gap: 10px;
+}
+
+.chat-composer input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+}
+
+.chat-composer input:focus {
+  border-color: var(--accent);
+}
+
+/* Memory Universe */
+
+.universe-page {
+  min-height: 100vh;
+  background-image: url('./assets/mee-universe-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.universe-header {
+  padding: 20px 24px 0;
+}
+
+.universe-header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  color: var(--navy);
+}
+
+.universe-header p {
+  margin: 0;
+  color: var(--secondary);
+  font-size: 13px;
+  max-width: 480px;
+}
+
+.universe-canvas {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.universe-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  padding: 0 24px 20px;
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.universe-empty {
+  margin: auto;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 360px;
+}
+
+.node-label {
+  font-size: 11px;
+  fill: var(--navy);
+  text-anchor: middle;
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 100vw;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 30px rgba(9, 30, 66, 0.1);
+  padding: 24px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.side-panel h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.side-panel .state-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.side-panel .why {
+  background: var(--mi-tint);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--navy);
+  margin: 12px 0;
+}
+
+.side-panel .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.close-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--secondary);
+}

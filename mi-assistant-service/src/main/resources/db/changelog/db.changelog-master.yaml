@@ -1,0 +1,33 @@
+# Every schema change and seed this service needs, in order, so a clean deployment comes
+# up populated. The SQL files are the changesets; Liquibase records and checksums each.
+databaseChangeLog:
+  - changeSet:
+      id: "202609050001"
+      author: msb
+      changes:
+        - sqlFile:
+            path: db/migration/V202609050001__mi_init.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            encoding: UTF-8
+  - changeSet:
+      id: "202609080002"
+      author: msb
+      changes:
+        - sqlFile:
+            path: db/migration/V202609080002__embedding_dim.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            encoding: UTF-8
+  - changeSet:
+      id: "202609110001"
+      author: msb
+      changes:
+        - sqlFile:
+            path: db/migration/V202609110001__dedupe_document_chunk.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            encoding: UTF-8

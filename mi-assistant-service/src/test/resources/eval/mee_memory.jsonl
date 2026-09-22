@@ -1,0 +1,10 @@
+{"id":"mee-001","utterance":"Tôi thích Golf.","expect":{"decision":"CANDIDATE","kind":"PREFERENCE","entity":"golf","explicit":true,"cardShown":true}}
+{"id":"mee-002","utterance":"Hôm nay tôi đi Golf với bạn.","expect":{"decision":"DONT_STORE","kind":"EVENT"}}
+{"id":"mee-003","utterance":"Tôi thích Golf vì thường gặp đối tác ở đó.","expect":{"decision":"CANDIDATE","kind":"PREFERENCE","entity":"golf","reason":"networking"}}
+{"id":"mee-004","utterance":"Tôi không còn chơi Golf nữa.","expect":{"decision":"DEACTIVATE","entity":"golf","resultingState":"INACTIVE"}}
+{"id":"mee-005","utterance":"Đừng nhớ chuyện tôi thích Golf.","expect":{"decision":"FORGET","entity":"golf","resultingState":"FORGOTTEN","recallEmpty":true}}
+{"id":"mee-006","utterance":"3 Golf Club transactions","context":{"source":"EVENTS","pattern":"recurring","count":3},"expect":{"decision":"HYPOTHESIS","kind":"HABIT","validationQuestion":true,"noPersonalisation":true}}
+{"id":"mee-007","utterance":"Cuối năm tôi muốn đi Nhật.","context":{"confirmedMemories":["golf"]},"expect":{"decision":"CANDIDATE","kind":"PLAN","entity":"japan","linkHypothesis":"golf-japan","validationQuestion":true}}
+{"id":"mee-008","utterance":"Tôi bị khóa tài khoản.","context":{"confirmedMemories":["golf","japan"]},"expect":{"intent":"SERVICE","recallKinds":[],"replyContainsNeither":["golf","japan"]}}
+{"id":"mee-009","utterance":"Có vẻ bạn quan tâm đầu tư dài hạn","context":{"hypothesisId":"mee-009-h"},"expect":{"hypothesis":"true"},"followUp":{"utterance":"Không, chỉ thử khoản nhỏ","expect":{"decision":"REJECT","suppressedDays":90}}}
+{"id":"mee-010","utterance":"Tôi có 200 triệu, nên làm gì?","expect":{"intent":"PLANNING","clarifyingQuestion":true,"noOfferUntilNeedConfirmed":true}}

@@ -1,0 +1,13 @@
+# GreenNode AgentBase runtime: every value comes from the runtime env file
+# (guideline 03 §5). Nothing secret is baked into the image.
+spring:
+  liquibase:
+    enabled: true
+
+app:
+  features:
+    seed-demo-data: false
+
+logging:
+  level:
+    com.app: INFO

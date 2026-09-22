@@ -1,0 +1,64 @@
+# AgentBase Runtime gives this container its own domain, separate from the gateway's — a genuine
+# cross-origin browser call to /api would need CORS the gateway does not have (no
+# corsConfigurationSource anywhere in gateway/src/main). So the browser never leaves this origin:
+# it calls same-origin /api/..., and nginx forwards that server-to-server to the real gateway,
+# where CORS does not apply at all. Same principle as admin/nginx.conf's same-network proxy to
+# `gateway:8080` and Vite's dev-server proxy in web/vite.config.ts — just pointed at the gateway's
+# public URL instead of a container name, since this container is not on that docker network.
+#
+# Keycloak is NOT proxied here, unlike the gateway: OAuth redirects are full browser navigations
+# (no CORS involved), and Keycloak answers its own token-endpoint CORS itself once the client's
+# webOrigins covers this origin (see infra/keycloak/realm-msb.json, client msb-web, "+"). Proxying
+# it would instead reintroduce the cookie-domain bug documented in web/README.md: the login form's
+# POST target is built from Keycloak's own KC_HOSTNAME, not from whatever host served the page, so
+# the browser has to talk to Keycloak directly under that same hostname throughout.
+resolver 1.1.1.1 8.8.8.8 valid=300s;
+
+server {
+  listen 8080;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  location /api/ {
+    # ${GATEWAY_ORIGIN} is filled in by nginx's own envsubst-on-templates entrypoint (this file is
+    # installed as a `.template`; see Dockerfile) from the container's GATEWAY_ORIGIN env var — no
+    # path on it, so the original request path (/api/v1/...) reaches the gateway unchanged, exactly
+    # what its own /api/** routes expect (guideline/04-api-gateway.md).
+    proxy_pass ${GATEWAY_ORIGIN};
+    proxy_http_version 1.1;
+    # The real upstream host, not this container's own ($host would be this app's own domain —
+    # Cloudflare and the origin's own nginx both route by Host/SNI, and a mismatched Host is a 403
+    # before the request ever reaches the gateway; found exactly this live against msbs.io.vn).
+    proxy_set_header Host              ${GATEWAY_HOST};
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_ssl_server_name on;
+    proxy_read_timeout 60s;
+  }
+
+  # AgentBase Runtime's one hard requirement (services/vrm-agent/.opencode/skills/agentbase/
+  # references/runtime-contract.md): GET /health -> 200, or the runtime never reaches ACTIVE.
+  location = /health {
+    access_log off;
+    add_header Content-Type application/json;
+    return 200 '{"status":"UP"}';
+  }
+
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+  location = /index.html {
+    add_header Cache-Control "no-cache";
+  }
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+  gzip_min_length 1024;
+}

@@ -1,0 +1,121 @@
+# memory-hook-service — shared configuration. Profiles: local (docker-compose), greennode (AgentBase).
+server:
+  port: 8080
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: memory-hook-service
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: true
+  mvc:
+    problemdetails:
+      enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/msb}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/msb/protocol/openid-connect/certs}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/msb?currentSchema=memory,public}
+    username: ${SPRING_DATASOURCE_USERNAME:msb}
+    password: ${SPRING_DATASOURCE_PASSWORD:msb}
+    hikari:
+      maximum-pool-size: 16
+      pool-name: memory-pool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: memory
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: memory
+    liquibase-schema: memory
+  data:
+    redis:
+      url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379/0}
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 16
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    properties:
+      security.protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  metrics:
+    tags:
+      service: memory-hook-service
+  tracing:
+    sampling:
+      probability: 1.0
+
+app:
+  locale:
+    default: ${APP_LOCALE_DEFAULT:vi}
+  gateway:
+    internal-url: ${APP_GATEWAY_INTERNAL_URL:http://localhost:8080}
+  keycloak:
+    token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/msb/protocol/openid-connect/token}
+    client-id: ${KEYCLOAK_CLIENT_ID:memory-hook-service}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET:changeit}
+
+  clients:
+    mi: ${APP_CLIENT_MI:http://localhost:8090}
+
+  memory:
+    # Two independent HMAC keys plus a KEK. In GreenNode all three come from the KMS/secret store;
+    # they must never be committed and rotating the KEK only re-wraps the per-customer DEKs.
+    pseudonym-key: ${MEMORY_PSEUDONYM_KEY:local-pseudonym-key-change-me}
+    lookup-key: ${MEMORY_LOOKUP_KEY:local-lookup-key-change-me}
+    kek: ${MEMORY_KEK:local-kek-change-me}
+    kek-version: ${MEMORY_KEK_VERSION:local-v1}
+    export-base-url: ${MEMORY_EXPORT_BASE_URL:http://localhost:8080}
+    embedding:
+      provider: ${MEMORY_EMBEDDING_PROVIDER:local}
+
+  events:
+    adapter: ${EVENT_BUS_ADAPTER:kafka}
+    publish-interval-ms: 1000
+  features:
+    seed-demo-data: ${APP_SEED_DEMO_DATA:false}
+
+logging:
+  level:
+    root: INFO
+    com.app: INFO
+  # Boot's ECS structured logging: correct JSON escaping and MDC (requestId)
+  # without a hand-rolled pattern.
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        name: memory-hook-service
